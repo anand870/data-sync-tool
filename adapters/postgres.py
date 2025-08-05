@@ -1,3 +1,4 @@
+from core.config import ReconciliationConfig
 from core.query import RowHashMeta, BlockHashMeta, BlockNameMeta
 from typing import Dict, Tuple
 import psycopg2
@@ -75,7 +76,6 @@ class PostgresAdapter(Adapter):
         return expr
 
 
-
     def _rewrite_query(self, query: Query) -> Query:
         rewritten = []
         for f in query.select:
@@ -115,16 +115,20 @@ class PostgresAdapter(Adapter):
     def execute(self, sql: str, params=None):
         self.cursor.execute(sql, params or [])
         self.conn.commit()
+    
+    def load_data(self, data, r_config: ReconciliationConfig):
+        pass
+        
 
-    def insert_or_update(self, table: str, row: dict):
-        cols, vals = zip(*row.items())
-        ph = ','.join(['%s'] * len(cols))
-        up = ','.join([f"{c}=EXCLUDED.{c}" for c in cols])
-        stmt = (
-            f"INSERT INTO {table} ({','.join(cols)}) VALUES ({ph}) "
-            f"ON CONFLICT ({','.join(self.config.get('unique_keys', cols))}) DO UPDATE SET {up};"
-        )
-        self.execute(stmt, vals)
+    # def insert_or_update(self, table: str, row: dict):
+    #     cols, vals = zip(*row.items())
+    #     ph = ','.join(['%s'] * len(cols))
+    #     up = ','.join([f"{c}=EXCLUDED.{c}" for c in cols])
+    #     stmt = (
+    #         f"INSERT INTO {table} ({','.join(cols)}) VALUES ({ph}) "
+    #         f"ON CONFLICT ({','.join(self.config.get('unique_keys', cols))}) DO UPDATE SET {up};"
+    #     )
+    #     self.execute(stmt, vals)
 
     def close(self):
         self.cursor.close()

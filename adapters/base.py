@@ -1,3 +1,4 @@
+from core.config import ReconciliationConfig
 from abc import ABC, abstractmethod
 from typing import Dict, List
 from core.config import DatastoreConfig, AdapterConfig
@@ -21,6 +22,9 @@ class Adapter(ABC):
 
     @abstractmethod
     def execute(self, sql: str, params=None): ...
+
+    @abstractmethod
+    def load_data(self, data, r_config: ReconciliationConfig): ...
 
     @abstractmethod
     def insert_or_update(self, table: str, row: dict): ...
